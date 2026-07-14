@@ -1,1 +1,56 @@
-# Hira
+# LegacyOS
+
+LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host sebagai situs statis di Vercel. AI Advisor dan pemindaian dokumen melewati Vercel Function sehingga `ANTHROPIC_API_KEY` tidak pernah dikirim ke browser.
+
+## Deploy ke Vercel
+
+1. Impor repositori ini melalui **Vercel → Add New → Project**.
+2. Pilih framework **Other**. Root directory tetap `./`; build/output directory tidak perlu diisi.
+3. Tambahkan Environment Variable:
+
+   ```text
+   ANTHROPIC_API_KEY=sk-ant-...
+   ANTHROPIC_MODEL=claude-sonnet-4-6
+   ```
+
+   `ANTHROPIC_MODEL` opsional dan dapat disesuaikan dengan model yang tersedia pada akun Anthropic Anda.
+4. Tekan **Deploy**. Vercel akan menyajikan `index.html` dan otomatis membuat function `/api/anthropic`.
+5. Setelah domain produksi tersedia, opsional tambahkan:
+
+   ```text
+   ALLOWED_ORIGINS=https://domain-anda.com
+   ```
+
+   Beberapa origin dapat dipisahkan dengan koma. Domain Vercel aktif diterima otomatis.
+
+Untuk deploy melalui CLI:
+
+```bash
+npx vercel
+npx vercel --prod
+```
+
+## Menjalankan dan memeriksa
+
+```bash
+npm run check
+npx vercel dev
+```
+
+`npm run check` memvalidasi HTML, JavaScript, konfigurasi Vercel, CSP, dan memastikan frontend tidak memuat kunci atau endpoint Anthropic secara langsung.
+
+## Struktur
+
+- `index.html` — shell aplikasi yang semantik dan responsif.
+- `styles.css` — tampilan LegacyOS tanpa ketergantungan font/CDN.
+- `app.js` — seluruh modul, data demo, CRUD lokal, laporan, dan fallback analitik.
+- `api/anthropic.mjs` — proxy server-side untuk AI Advisor dan ekstraksi dokumen.
+- `vercel.json` — security headers dan kebijakan cache.
+
+## Batas keamanan yang perlu dipahami
+
+- Login dan pemilih peran saat ini adalah **simulasi client-side**, bukan autentikasi produksi.
+- Data aplikasi disimpan di `localStorage`, sehingga hanya tersedia pada browser/perangkat yang sama. Gunakan ekspor JSON untuk backup.
+- Jangan memasukkan data keluarga nyata sebelum menambahkan autentikasi server-side, database terenkripsi, otorisasi per pengguna, audit log, dan object storage privat.
+- Endpoint AI memiliki validasi origin, pembatasan ukuran, timeout, dan rate limit ringan. Deployment publik yang berisi data nyata tetap memerlukan autentikasi.
+- Situs memakai `noindex,nofollow` dan `robots.txt` agar tautan publik tidak diindeks mesin pencari. Hapus keduanya hanya bila memang ingin situs ditemukan lewat pencarian.
