@@ -882,7 +882,7 @@
       <div class="grid cols-2">
         <article class="panel">
           ${panelHead("Pindai Dokumen dengan AI", `<span class="chip info">via /api/anthropic</span>`)}
-          <button id="drop-zone" class="drop-zone" type="button" data-action="scan-file"><span style="font-size:26px">⌗</span><b>Pilih foto, PDF, atau berkas teks</b><span>Maksimum 4 MB · tinjau hasil sebelum menyimpan</span></button>
+          <button id="drop-zone" class="drop-zone" type="button" data-action="scan-file"><span style="font-size:26px">⌗</span><b>Pilih foto, PDF, atau berkas teks</b><span>Maksimum 2,5 MB · tinjau hasil sebelum menyimpan</span></button>
           <input id="scan-file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,text/plain,text/csv" hidden>
           <p class="muted" style="margin:11px 0 7px;text-align:center;font-size:10px">— atau tempel teks —</p>
           <textarea id="scan-text" rows="6" placeholder="Tempel isi surat dividen, invoice, mutasi rekening, atau capital call…"></textarea>
@@ -1243,7 +1243,7 @@
 
   async function handleScanFile(file) {
     if (!file) return;
-    if (file.size > 4 * 1024 * 1024) return toast("Berkas maksimum 4 MB.", "warning");
+    if (file.size > 2.5 * 1024 * 1024) return toast("Berkas maksimum 2,5 MB.", "warning");
     toast("Membaca berkas…");
     if (file.type.startsWith("text/")) {
       const text = await file.text();

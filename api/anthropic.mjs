@@ -81,6 +81,21 @@ function bodySize(request) {
   }
 }
 
+function parseBody(request) {
+  if (request.body && typeof request.body === "object" && !Array.isArray(request.body)) return request.body;
+  if (typeof request.body === "string") {
+    try {
+      const parsed = JSON.parse(request.body);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+    } catch {
+      // The generic invalid-request response below is intentional.
+    }
+  }
+  const error = new Error("Body JSON tidak valid.");
+  error.code = "INVALID_REQUEST";
+  throw error;
+}
+
 function cleanMessages(input) {
   if (!Array.isArray(input)) return [];
   return input
@@ -226,8 +241,8 @@ export default async function handler(request, response) {
   if (rateLimited(request)) return json(response, 429, { error: "Terlalu banyak permintaan. Coba lagi sebentar." });
   if (bodySize(request) > MAX_BODY_BYTES) return json(response, 413, { error: "Permintaan terlalu besar." });
 
-  const body = request.body && typeof request.body === "object" ? request.body : {};
   try {
+    const body = parseBody(request);
     if (body.action === "advisor") return json(response, 200, await advisor(body));
     if (body.action === "extract") return json(response, 200, await extract(body));
     return json(response, 400, { error: "Aksi tidak dikenali." });
