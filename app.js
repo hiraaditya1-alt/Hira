@@ -816,7 +816,7 @@
     return pageHeader("Operasional", "Keamanan & Akses", "Status keamanan aktual untuk deployment statis ini.") + `
       <div class="grid cols-3">
         <article class="panel"><div class="kpi-label">Data Aplikasi</div><div class="kpi-value" style="font-size:18px">Browser localStorage</div><div class="kpi-sub">per perangkat · bukan zero-knowledge cloud</div></article>
-        <article class="panel"><div class="kpi-label">Kunci AI</div><div class="kpi-value" style="font-size:18px">Server-side Vercel</div><div class="kpi-sub">tidak dikirim ke browser</div></article>
+        <article class="panel"><div class="kpi-label">Kunci AI</div><div class="kpi-value" style="font-size:18px">Vercel AI Gateway</div><div class="kpi-sub">tidak dikirim ke browser</div></article>
         <article class="panel"><div class="kpi-label">Autentikasi</div><div class="kpi-value warn" style="font-size:18px">Demo client-side</div><div class="kpi-sub">tambahkan Vercel Authentication sebelum data nyata</div></article>
       </div>
       <article class="panel" style="margin-top:16px">${panelHead("Matriks Peran")}
@@ -832,7 +832,7 @@
       "Jika properti turun 20%, apa dampaknya?",
       "Apa agenda terdekat?",
     ];
-    return pageHeader("Intelijen", "AI Advisor", "Permintaan dikirim melalui Vercel Function; kunci penyedia AI tidak pernah diekspos ke browser.") + `
+    return pageHeader("Intelijen", "AI Advisor", "Permintaan dikirim melalui Vercel Function + AI Gateway; kunci penyedia AI tidak pernah diekspos ke browser.") + `
       <div class="grid cols-2-1">
         <article class="panel">
           <div class="chip-row" style="margin-bottom:12px">${quick.map((question) => `<button class="filter-button" type="button" data-action="ai-quick" data-question="${escapeHtml(question)}">${escapeHtml(question)}</button>`).join("")}</div>
@@ -881,7 +881,7 @@
       </div>
       <div class="grid cols-2">
         <article class="panel">
-          ${panelHead("Pindai Dokumen dengan AI", `<span class="chip info">via /api/anthropic</span>`)}
+          ${panelHead("Pindai Dokumen dengan AI", `<span class="chip info">via Vercel AI Gateway</span>`)}
           <button id="drop-zone" class="drop-zone" type="button" data-action="scan-file"><span style="font-size:26px">⌗</span><b>Pilih foto, PDF, atau berkas teks</b><span>Maksimum 2,5 MB · tinjau hasil sebelum menyimpan</span></button>
           <input id="scan-file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,text/plain,text/csv" hidden>
           <p class="muted" style="margin:11px 0 7px;text-align:center;font-size:10px">— atau tempel teks —</p>

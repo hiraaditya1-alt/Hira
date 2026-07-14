@@ -1,4 +1,6 @@
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
+const AI_GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/messages";
+const DEFAULT_MODEL = "claude-sonnet-4-6";
 const MAX_BODY_BYTES = 4_000_000;
 const WINDOW_MS = 60_000;
 const REQUESTS_PER_WINDOW = 20;
@@ -115,29 +117,64 @@ function cleanContext(input) {
   return JSON.parse(serialized);
 }
 
-async function callAnthropic(payload) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    const error = new Error("AI belum dikonfigurasi pada deployment ini.");
-    error.code = "AI_NOT_CONFIGURED";
-    throw error;
+function resolveProvider() {
+  const gatewayKey = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+  if (gatewayKey) {
+    return {
+      mode: "gateway",
+      url: AI_GATEWAY_URL,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${gatewayKey}`,
+        "x-api-key": gatewayKey,
+        "anthropic-version": "2023-06-01",
+      },
+    };
   }
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (anthropicKey) {
+    return {
+      mode: "anthropic",
+      url: ANTHROPIC_URL,
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": anthropicKey,
+        "anthropic-version": "2023-06-01",
+      },
+    };
+  }
+  const error = new Error("AI belum dikonfigurasi pada deployment ini. Set AI_GATEWAY_API_KEY (disarankan) atau ANTHROPIC_API_KEY.");
+  error.code = "AI_NOT_CONFIGURED";
+  throw error;
+}
+
+function resolveModel(mode) {
+  const configured = String(process.env.AI_MODEL || process.env.ANTHROPIC_MODEL || DEFAULT_MODEL).trim();
+  if (mode === "gateway") {
+    if (configured.includes("/")) return configured;
+    return `anthropic/${configured}`;
+  }
+  return configured.includes("/") ? configured.split("/").pop() : configured;
+}
+
+async function callModel(payload) {
+  const provider = resolveProvider();
+  const body = {
+    ...payload,
+    model: resolveModel(provider.mode),
+  };
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
-    const upstream = await fetch(ANTHROPIC_URL, {
+    const upstream = await fetch(provider.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(payload),
+      headers: provider.headers,
+      body: JSON.stringify(body),
       signal: controller.signal,
     });
     const result = await upstream.json().catch(() => ({}));
     if (!upstream.ok) {
-      console.error("Anthropic request failed", upstream.status, result?.error?.type || "unknown");
+      console.error("AI upstream failed", provider.mode, upstream.status, result?.error?.type || result?.error?.message || "unknown");
       const error = new Error("Penyedia AI tidak dapat memproses permintaan.");
       error.code = "AI_UPSTREAM_ERROR";
       error.status = upstream.status;
@@ -171,8 +208,7 @@ Jika data tidak tersedia, katakan dengan jelas. Pisahkan fakta dari simulasi.
 Anda bukan penasihat investasi, pajak, atau hukum berlisensi; arahkan keputusan material ke komite atau penasihat profesional.
 Konteks JSON:
 ${JSON.stringify(context)}`;
-  const text = await callAnthropic({
-    model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
+  const text = await callModel({
     max_tokens: 800,
     temperature: 0.2,
     system,
@@ -222,8 +258,7 @@ async function extract(body) {
   } else {
     content = `Ekstrak transaksi utama dari teks berikut sesuai skema:\n---\n${text}`;
   }
-  const result = await callAnthropic({
-    model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
+  const result = await callModel({
     max_tokens: 700,
     temperature: 0,
     system: EXTRACTION_SYSTEM,
@@ -255,3 +290,5 @@ export default async function handler(request, response) {
     return json(response, status, { error: error.message || "Permintaan AI gagal.", code: error.code || "AI_ERROR" });
   }
 }
+
+export { resolveProvider, resolveModel, AI_GATEWAY_URL, ANTHROPIC_URL };

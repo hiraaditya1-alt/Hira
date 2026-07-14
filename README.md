@@ -1,19 +1,29 @@
 # LegacyOS
 
-LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host sebagai situs statis di Vercel. AI Advisor dan pemindaian dokumen melewati Vercel Function sehingga `ANTHROPIC_API_KEY` tidak pernah dikirim ke browser.
+LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host sebagai situs statis di Vercel. AI Advisor dan pemindaian dokumen melewati Vercel Function + **Vercel AI Gateway**, sehingga kunci penyedia AI tidak pernah dikirim ke browser.
 
 ## Deploy ke Vercel
 
 1. Impor repositori ini melalui **Vercel → Add New → Project**.
 2. Pilih framework **Other**. Root directory tetap `./`; build/output directory tidak perlu diisi.
-3. Tambahkan Environment Variable:
+3. Tambahkan Environment Variable (pilih salah satu cara autentikasi AI):
+
+   **Disarankan — Vercel AI Gateway**
+
+   ```text
+   AI_GATEWAY_API_KEY=vck_...
+   AI_MODEL=anthropic/claude-sonnet-4-6
+   ```
+
+   Buat kunci di **Vercel Dashboard → AI Gateway → API Keys**. Pada deployment Vercel, OIDC (`VERCEL_OIDC_TOKEN`) juga dapat dipakai otomatis tanpa kunci terpisah.
+
+   **Alternatif — Anthropic langsung**
 
    ```text
    ANTHROPIC_API_KEY=sk-ant-...
    ANTHROPIC_MODEL=claude-sonnet-4-6
    ```
 
-   `ANTHROPIC_MODEL` opsional dan dapat disesuaikan dengan model yang tersedia pada akun Anthropic Anda.
 4. Tekan **Deploy**. Vercel akan menyajikan `index.html` dan otomatis membuat function `/api/anthropic`.
 5. Setelah domain produksi tersedia, opsional tambahkan:
 
@@ -37,14 +47,14 @@ npm run check
 npx vercel dev
 ```
 
-`npm run check` memvalidasi HTML, JavaScript, konfigurasi Vercel, CSP, dan memastikan frontend tidak memuat kunci atau endpoint Anthropic secara langsung.
+`npm run check` memvalidasi HTML, JavaScript, konfigurasi Vercel, CSP, dan memastikan frontend tidak memuat kunci atau endpoint penyedia AI secara langsung.
 
 ## Struktur
 
 - `index.html` — shell aplikasi yang semantik dan responsif.
 - `styles.css` — tampilan LegacyOS tanpa ketergantungan font/CDN.
 - `app.js` — seluruh modul, data demo, CRUD lokal, laporan, dan fallback analitik.
-- `api/anthropic.mjs` — proxy server-side untuk AI Advisor dan ekstraksi dokumen.
+- `api/anthropic.mjs` — proxy server-side ke Vercel AI Gateway (atau Anthropic langsung) untuk AI Advisor dan ekstraksi dokumen.
 - `vercel.json` — security headers dan kebijakan cache.
 
 ## Batas keamanan yang perlu dipahami
