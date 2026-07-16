@@ -13,5 +13,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/oidc": "^3.8.0"
   }
 }

@@ -1,3 +1,5 @@
+import { getVercelOidcToken } from "@vercel/oidc";
+
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const AI_GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/messages";
 const DEFAULT_MODEL = "claude-sonnet-4-6";
@@ -5,6 +7,32 @@ const MAX_BODY_BYTES = 4_000_000;
 const WINDOW_MS = 60_000;
 const REQUESTS_PER_WINDOW = 20;
 const buckets = new Map();
+
+function gatewayProvider(token) {
+  return {
+    mode: "gateway",
+    url: AI_GATEWAY_URL,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "x-api-key": token,
+      "anthropic-version": "2023-06-01",
+    },
+  };
+}
+
+async function readOidcToken() {
+  // On Vercel, the short-lived token arrives via request context / header.
+  // Locally (and in unit tests) only honor an explicit VERCEL_OIDC_TOKEN env var
+  // so @vercel/oidc does not silently reload .env.local mid-test.
+  if (process.env.VERCEL !== "1") return "";
+  try {
+    const token = await getVercelOidcToken();
+    return token ? String(token).trim() : "";
+  } catch {
+    return "";
+  }
+}
 
 const EXTRACTION_SYSTEM = `Anda adalah mesin ekstraksi dokumen keuangan untuk kantor keluarga Indonesia.
 Balas HANYA dengan satu objek JSON valid, tanpa markdown atau teks tambahan, memakai skema:
@@ -117,21 +145,14 @@ function cleanContext(input) {
   return JSON.parse(serialized);
 }
 
-function resolveProvider() {
-  const gatewayKey = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
-  if (gatewayKey) {
-    return {
-      mode: "gateway",
-      url: AI_GATEWAY_URL,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${gatewayKey}`,
-        "x-api-key": gatewayKey,
-        "anthropic-version": "2023-06-01",
-      },
-    };
-  }
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+async function resolveProvider() {
+  const gatewayKey = String(process.env.AI_GATEWAY_API_KEY || "").trim();
+  if (gatewayKey) return gatewayProvider(gatewayKey);
+
+  const oidcToken = String(process.env.VERCEL_OIDC_TOKEN || "").trim() || await readOidcToken();
+  if (oidcToken) return gatewayProvider(oidcToken);
+
+  const anthropicKey = String(process.env.ANTHROPIC_API_KEY || "").trim();
   if (anthropicKey) {
     return {
       mode: "anthropic",
@@ -158,7 +179,7 @@ function resolveModel(mode) {
 }
 
 async function callModel(payload) {
-  const provider = resolveProvider();
+  const provider = await resolveProvider();
   const body = {
     ...payload,
     model: resolveModel(provider.mode),
