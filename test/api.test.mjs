@@ -83,14 +83,14 @@ test("advisor reports missing server-side configuration without leaking secrets"
   }
 });
 
-test("resolveProvider prefers Vercel AI Gateway over direct Anthropic", () => {
+test("resolveProvider prefers Vercel AI Gateway over direct Anthropic", async () => {
   const previousGateway = process.env.AI_GATEWAY_API_KEY;
   const previous = process.env.ANTHROPIC_API_KEY;
   clearAiEnv();
   process.env.AI_GATEWAY_API_KEY = "gateway-test-key";
   process.env.ANTHROPIC_API_KEY = "anthropic-test-key";
   try {
-    const provider = resolveProvider();
+    const provider = await resolveProvider();
     assert.equal(provider.mode, "gateway");
     assert.equal(provider.url, AI_GATEWAY_URL);
     assert.equal(resolveModel("gateway"), "anthropic/claude-sonnet-4-6");
@@ -98,6 +98,19 @@ test("resolveProvider prefers Vercel AI Gateway over direct Anthropic", () => {
     clearAiEnv();
     if (previousGateway) process.env.AI_GATEWAY_API_KEY = previousGateway;
     if (previous) process.env.ANTHROPIC_API_KEY = previous;
+  }
+});
+
+test("resolveProvider uses Vercel OIDC token for AI Gateway", async () => {
+  clearAiEnv();
+  process.env.VERCEL_OIDC_TOKEN = "oidc-test-token";
+  process.env.ANTHROPIC_API_KEY = "anthropic-test-key";
+  try {
+    const provider = await resolveProvider();
+    assert.equal(provider.mode, "gateway");
+    assert.equal(provider.headers.Authorization, "Bearer oidc-test-token");
+  } finally {
+    clearAiEnv();
   }
 });
 

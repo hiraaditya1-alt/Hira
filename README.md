@@ -2,6 +2,8 @@
 
 LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host sebagai situs statis di Vercel. AI Advisor dan pemindaian dokumen melewati Vercel Function + **Vercel AI Gateway**, sehingga kunci penyedia AI tidak pernah dikirim ke browser.
 
+**Production saat ini:** [https://legacyos-mauve.vercel.app](https://legacyos-mauve.vercel.app)
+
 ## Deploy ke Vercel
 
 1. Impor repositori ini melalui **Vercel → Add New → Project**.
@@ -15,7 +17,7 @@ LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host se
    AI_MODEL=anthropic/claude-sonnet-4-6
    ```
 
-   Buat kunci di **Vercel Dashboard → AI Gateway → API Keys**. Pada deployment Vercel, OIDC (`VERCEL_OIDC_TOKEN`) juga dapat dipakai otomatis tanpa kunci terpisah.
+   Buat kunci di **Vercel Dashboard → AI Gateway → API Keys**. Pada deployment Vercel, autentikasi OIDC lewat `@vercel/oidc` juga dicoba otomatis tanpa kunci terpisah.
 
    **Alternatif — Anthropic langsung**
 
