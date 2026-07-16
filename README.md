@@ -5,7 +5,7 @@ LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host se
 ## Deploy ke Vercel
 
 1. Impor repositori ini melalui **Vercel → Add New → Project**.
-2. Pilih framework **Other**. Root directory tetap `./`; build/output directory tidak perlu diisi.
+2. Pilih framework **Other** dan biarkan Root Directory tetap `./`. Build command dan output directory sudah dikunci lewat `vercel.json` (`npm run build` → `public`), jadi tidak perlu diubah manual.
 3. Tambahkan Environment Variable:
 
    ```text
@@ -14,7 +14,7 @@ LegacyOS adalah dashboard family-office berbahasa Indonesia yang siap di-host se
    ```
 
    `ANTHROPIC_MODEL` opsional dan dapat disesuaikan dengan model yang tersedia pada akun Anthropic Anda.
-4. Tekan **Deploy**. Vercel akan menyajikan `index.html` dan otomatis membuat function `/api/anthropic`.
+4. Tekan **Deploy**. Vercel akan menyajikan isi folder `public/` dan otomatis membuat function `/api/anthropic`.
 5. Setelah domain produksi tersedia, opsional tambahkan:
 
    ```text
@@ -41,11 +41,11 @@ npx vercel dev
 
 ## Struktur
 
-- `index.html` — shell aplikasi yang semantik dan responsif.
-- `styles.css` — tampilan LegacyOS tanpa ketergantungan font/CDN.
-- `app.js` — seluruh modul, data demo, CRUD lokal, laporan, dan fallback analitik.
+- `public/index.html` — shell aplikasi yang semantik dan responsif.
+- `public/styles.css` — tampilan LegacyOS tanpa ketergantungan font/CDN.
+- `public/app.js` — seluruh modul, data demo, CRUD lokal, laporan, dan fallback analitik.
 - `api/anthropic.mjs` — proxy server-side untuk AI Advisor dan ekstraksi dokumen.
-- `vercel.json` — security headers dan kebijakan cache.
+- `vercel.json` — build/output directory, security headers, dan kebijakan cache.
 
 ## Batas keamanan yang perlu dipahami
 

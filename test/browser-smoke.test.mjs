@@ -7,7 +7,7 @@ import path from "node:path";
 import test from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 
-const ROOT = process.cwd();
+const ROOT = path.join(process.cwd(), "public");
 const CHROME = process.env.CHROME_PATH || "/usr/local/bin/google-chrome";
 
 class CdpClient {

@@ -5,11 +5,11 @@ import process from "node:process";
 
 const root = process.cwd();
 const required = [
-  "index.html",
-  "styles.css",
-  "app.js",
-  "favicon.svg",
-  "robots.txt",
+  "public/index.html",
+  "public/styles.css",
+  "public/app.js",
+  "public/favicon.svg",
+  "public/robots.txt",
   "vercel.json",
   "api/anthropic.mjs",
 ];
@@ -26,9 +26,9 @@ for (const file of required) {
 
 const read = (file) => readFile(path.join(root, file), "utf8");
 const [html, css, app, api, vercelRaw] = await Promise.all([
-  read("index.html"),
-  read("styles.css"),
-  read("app.js"),
+  read("public/index.html"),
+  read("public/styles.css"),
+  read("public/app.js"),
   read("api/anthropic.mjs"),
   read("vercel.json"),
 ]);
@@ -60,6 +60,7 @@ if (!api.includes("rateLimited")) failures.push("API route tidak memiliki rate l
 try {
   const config = JSON.parse(vercelRaw);
   if (config.framework !== null) failures.push("Vercel framework harus null untuk proyek statis ini.");
+  if (config.outputDirectory !== "public") failures.push("Vercel outputDirectory harus \"public\".");
   if (!Array.isArray(config.headers) || config.headers.length === 0) failures.push("Security headers Vercel tidak ditemukan.");
   if (!vercelRaw.includes("Content-Security-Policy")) failures.push("Content-Security-Policy tidak dikonfigurasi.");
 } catch (error) {
