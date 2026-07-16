@@ -53,7 +53,9 @@ for (const forbidden of ["api.anthropic.com", "x-api-key", "anthropic-dangerous-
   if (app.includes(forbidden)) failures.push(`Rahasia/provider endpoint bocor ke app.js: ${forbidden}`);
 }
 if (!app.includes('fetch("/api/anthropic"')) failures.push("Frontend tidak memakai proxy /api/anthropic.");
+if (!api.includes("process.env.AI_GATEWAY_API_KEY")) failures.push("API route tidak membaca AI_GATEWAY_API_KEY dari environment.");
 if (!api.includes("process.env.ANTHROPIC_API_KEY")) failures.push("API route tidak membaca ANTHROPIC_API_KEY dari environment.");
+if (!api.includes("ai-gateway.vercel.sh")) failures.push("API route tidak mengarah ke Vercel AI Gateway.");
 if (!api.includes("MAX_BODY_BYTES")) failures.push("API route tidak membatasi ukuran body.");
 if (!api.includes("rateLimited")) failures.push("API route tidak memiliki rate limiter.");
 
