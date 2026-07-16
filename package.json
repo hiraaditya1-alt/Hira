@@ -1,0 +1,17 @@
+{
+  "name": "legacyos-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "LegacyOS family-office dashboard prepared for secure Vercel deployment.",
+  "scripts": {
+    "build": "node scripts/validate.mjs",
+    "check": "node scripts/validate.mjs && node --test",
+    "test": "node --test",
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

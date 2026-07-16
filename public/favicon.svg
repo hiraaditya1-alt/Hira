@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LegacyOS">
+  <circle cx="32" cy="32" r="29" fill="#0c1017" stroke="#c2a35c" stroke-width="3"/>
+  <circle cx="32" cy="32" r="23" fill="none" stroke="#8a7440" stroke-dasharray="2 3"/>
+  <text x="32" y="42" fill="#e4c883" font-family="Georgia,serif" font-size="30" font-weight="600" text-anchor="middle">L</text>
+</svg>
