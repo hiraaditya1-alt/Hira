@@ -180,6 +180,7 @@ test("LegacyOS loads and navigates in a real browser", { timeout: 35_000 }, asyn
     const dashboard = await client.evaluate(`({
       appHidden: document.querySelector('#app').hidden,
       loginHidden: document.querySelector('#login').hidden,
+      loginDisplay: getComputedStyle(document.querySelector('#login')).display,
       title: document.querySelector('#view .page-title')?.textContent,
       navCount: document.querySelectorAll('#nav .nav-item').length,
       panels: document.querySelectorAll('#view .panel').length
@@ -187,12 +188,20 @@ test("LegacyOS loads and navigates in a real browser", { timeout: 35_000 }, asyn
     assert.deepEqual(dashboard, {
       appHidden: false,
       loginHidden: true,
+      loginDisplay: "none",
       title: "Selamat datang, Keluarga Wijaya",
       navCount: 22,
       panels: 8,
     });
 
-    await client.evaluate("document.querySelector('[data-module=\"assets\"]').click()");
+    const assetsButton = await client.evaluate(`(() => {
+      const button = document.querySelector('[data-module="assets"]');
+      const rect = button.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    })()`);
+    await client.send("Input.dispatchMouseEvent", { type: "mousePressed", x: assetsButton.x, y: assetsButton.y, button: "left", clickCount: 1 });
+    await client.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: assetsButton.x, y: assetsButton.y, button: "left", clickCount: 1 });
+    await delay(100);
     assert.equal(await client.evaluate("document.querySelector('#view .page-title').textContent"), "Asset Registry");
     assert.equal(await client.evaluate("document.querySelectorAll('.asset-card').length"), 10);
     await client.evaluate("document.querySelector('.asset-card').click()");

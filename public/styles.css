@@ -127,6 +127,11 @@ a {
   transition: opacity 240ms ease;
 }
 
+.login[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
 .login-card {
   width: min(410px, 100%);
   border: 1px solid var(--line);

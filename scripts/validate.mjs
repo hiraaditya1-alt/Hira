@@ -41,6 +41,7 @@ if (!html.includes('href="/styles.css"')) failures.push("index.html tidak memuat
 if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) failures.push("Inline script tidak diizinkan.");
 if (/<[^>]+\son\w+=/i.test(html)) failures.push("Inline event handler tidak diizinkan.");
 if (!css.includes("@media (max-width: 880px)")) failures.push("Breakpoint navigasi mobile tidak ditemukan.");
+if (!css.includes(".login[hidden]")) failures.push("Layar login harus benar-benar disembunyikan setelah masuk.");
 
 try {
   // Compile only; the browser code is not executed in Node.
