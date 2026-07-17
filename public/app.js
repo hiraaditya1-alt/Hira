@@ -1421,9 +1421,13 @@
     $("#role-select").value = state.role;
     $("#login-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      $("#login").style.opacity = "0";
+      const login = $("#login");
+      login.style.pointerEvents = "none";
+      login.style.opacity = "0";
       window.setTimeout(() => {
-        $("#login").hidden = true;
+        login.hidden = true;
+        login.style.removeProperty("opacity");
+        login.style.removeProperty("pointer-events");
         $("#app").hidden = false;
         updateRole();
         toast("Sesi demo dimulai. Gunakan data contoh atau mulai dari data kosong.");
